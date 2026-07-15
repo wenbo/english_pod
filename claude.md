@@ -33,4 +33,80 @@ japanesepodの作成ありがとうございます。
 コミットはしていません。日本語版・中国語版あわせて730件のPDFと scripts/ は未追跡状態です。コミットしてよければお知らせください。
 
 ## claude
-english_pod/pdf には chinese_version, english_version, japanese_versionのディレクトリがあります。
+現在はenglish_pod/pdf には chinese_version, english_version, japanese_versionのディレクトリがあります。
+
+english_podと同じディレクトリでenglish_pod_chinese_version, english_pod_japanese_version を作成して、そしてchinese_version, japanese_version のPDFをそれぞれに移動してください。
+
+
+/Users/bob/workspace/github/englishpod365/ の各sub directoryにはpr.mp3があります。
+
+こちらのmp3の字幕fileは
+/Users/bob/workspace/github/english_pod/srt/ にあるので、こちらのmp3をsrt/ directory に移動してください。mp3 file nameはsrt file と同じfile nameにしてください。
+例えば englishpod_0001.srt だったら、englishpod_0001.mp3 です。
+
+
+## reply
+重要な発見があります。ファイル種別を整理します:
+
+- dg = dialog（対話のみ）
+- pb = podcast全編（本編、349件）
+- pr = 別名の本編（15件のみ、pb の代わり）
+- rv = review（復習）
+
+pr と pb は排他的（15 + 350 = 365）で、どちらも「本編」音声です。実際 leaf 0001 の pr.srt は srt/englishpod_0001.srt と完全一致 → 字幕は本編（pr/pb）音声に対応しています。
+## claude
+iina というplayerででsrt/ のmp3をplay したのですが、srtの字幕は自動的に出てきてくれないです。
+iina では、englishpod_0001.mp3 というnameはElementary - Difficult Customerと表示されています。
+srtの字幕は自動的に読み込めるようにしてください。
+
+IINA の画面では、englishpod_0005.mp3 というnameはElementary - Cut In Lineと表示されています。
+
+## reply
+IINAの設定を更新しました。
+
+変更内容（com.colliderli.iina の設定）
+- Advanced設定を有効化
+- mpvオプション sub-auto=fuzzy を追加 → mp3（音声ファイル）でも同名SRTを自動読込
+
+次に必要な操作（あなたの手元で）
+
+設定はIINA起動時に読み込まれるため、IINAを一度完全に終了して再起動してください。今このセッションから終了させるなら、プロンプトに次を打てば実行されます:
+
+! osascript -e 'quit app "IINA"'
+
+その後 englishpod_0001.mp3 を開くと、englishpod_0001.srt が自動的に読み込まれ字幕が表示されます。
+
+確認のポイント
+- もし音声再生時に「ミニプレイヤー（Music Mode）」に切り替わると字幕が見えないことがあります。その場合はメニューの Window → Enter/Exit Music Mode で通常ウィンドウに戻すと字幕が表示されます。
+- IINA画面に字幕が出ない時は Subtitles メニューでトラックが選択されているか確認できます。
+
+補足（無害）: IINAで「Elementary - Difficult Customer」と表示されるのは、mp3内のID3タイトルタグの値です。字幕の読込には無関係なのでそのままで問題ありません。
+
+元に戻したい場合
+defaults delete com.colliderli.iina userOptions
+
+---
+再起動しても字幕が出ない場合は、確実な代替策として SRTをmp3に埋め込む（動画コンテナ化） 方法もあります（ffmpegのインストールが必要）。その場合はどのプレーヤーでも自動で字幕が出るようになります。必要ならお知らせください。
+
+## prompt0716
+現在はsrt/での各字幕は英語です。日本語にも訳してください。
+日本語の字幕のfile nameは englishpod_0001_japanese.srt englishpod_0002_japanese.srt のようにしてください。
+
+## reply0716
+字幕は各回のポッドキャスト全編（司会の解説＋ダイアログ＋語彙説明）の文字起こしで、1ファイルあたり146〜350エントリ、365ファイル合計で約7.9MBあります。これを全て日本語訳（タイムスタンプ・番号は保持、テキストのみ翻訳）するのはかなり大きな作業です。
+
+やり方が2通りあり、どちらも結果は同じ（全365件の englishpod_NNNN_japanese.srt 生成）ですが、規模が大きくトークン消費もそれなりになるため、進め方を確認させてください。
+
+ワークフローで実行します。各字幕ファイルを1エージェントが担当し、番号・タイムスタンプを保持したままテキストのみを日本語訳して englishpod_NNNN_japanese.srt を書き出します。翻訳後に整合性（ブロック数一致）を自己検証し、不一致は再実行します。
+
+コスト効率と十分な翻訳品質のバランスから、翻訳エージェントには Sonnet を使います。
+
+## prompt0716
+You've hit your session limit · resets 3:20pm
+
+現在、トークンの使用上限に達しているため、リセット後に引き続きご対応いただけますでしょうか。
+リセットされたら、またpromptを出します。
+
+残り61件（欠落60 + ブロック数不一致1件[0252]）の翻訳ワークフローを起動しました。前回の304件は正常に完成しています。
+
+完了通知が来たら、再度ディスク上で全365件のブロック数一致を検証し、結果を報告します。
